@@ -1,3 +1,11 @@
+/*
+RUN COMMAND:
+```
+mpicc -o bruteforce.o bruteforce.c -lcrypto
+mpirun -np 4 ./bruteforce.o
+```
+*/
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
