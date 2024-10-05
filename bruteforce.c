@@ -6,8 +6,8 @@ Parte A Inciso 4
 
 RUN COMMAND:
 ```
-mpicc -o bruteforce.o bruteforce.c -lcrypto
-mpirun -np 4 ./bruteforce.o
+mpicc bruteforce.c -lcrypto -o /build/bruteforce.o
+mpirun -np 4 ./build/bruteforce.o
 ```
 */
 

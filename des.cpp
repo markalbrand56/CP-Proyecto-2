@@ -4,6 +4,9 @@ Grupo 4
 
 Parte B inciso 1: DES
 
+g++ -o build/des.o des.cpp
+./build/des.o
+
 */
 
 #include <iostream>

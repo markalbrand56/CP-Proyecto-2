@@ -1,4 +1,5 @@
 *.txt
+build
 # Prerequisites
 *.d
 
