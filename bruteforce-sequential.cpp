@@ -98,6 +98,8 @@ int main(int argc, char **argv) {
     cout << "Ingrese una clave numérica para cifrar (0 - 2^64 - 1): ";
     cin >> key;
 
+    cout << "Usando la llave: " << key << endl;
+
     encryptText(key, plain_text, cipher_text);
 
     cout << "Texto cifrado: " << cipher_text << endl;
