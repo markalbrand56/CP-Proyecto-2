@@ -8,6 +8,7 @@ g++ -o build/bruteforce-sequential.o bruteforce-sequential.cpp
 ./build/bruteforce-sequential.o
 
 */
+
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -15,7 +16,9 @@ g++ -o build/bruteforce-sequential.o bruteforce-sequential.cpp
 #include <iomanip>
 #include <openssl/des.h>
 
-void encryptText(const std::string& key, const std::string& plain_text, std::string& cipher_text) {
+using namespace std;
+
+void encryptText(const string& key, const string& plain_text, string& cipher_text) {
     DES_cblock key_block;
     DES_key_schedule schedule;
     memcpy(key_block, key.c_str(), sizeof(key_block));
@@ -28,11 +31,11 @@ void encryptText(const std::string& key, const std::string& plain_text, std::str
     for (size_t i = 0; i < plain_text_length; i += 8) {
         DES_ecb_encrypt((const_DES_cblock*)(plain_text.c_str() + i), (DES_cblock*)(encrypted_text + i), &schedule, DES_ENCRYPT);
     }
-    
-    cipher_text = std::string(encrypted_text, plain_text_length); // Ajustar tamaño
+
+    cipher_text = string(encrypted_text, plain_text_length); // Ajustar tamaño
 }
 
-bool tryKey(const std::string& key, const std::string& cipher_text, const std::string& key_phrase) {
+bool tryKey(const string& key, const string& cipher_text, const string& key_phrase) {
     DES_cblock key_block;
     DES_key_schedule schedule;
     memcpy(key_block, key.c_str(), sizeof(key_block));
@@ -47,36 +50,31 @@ bool tryKey(const std::string& key, const std::string& cipher_text, const std::s
 
     // Verificar si contiene la frase clave
     if (strstr(decrypted_text, key_phrase.c_str()) != nullptr) {
-        std::cout << "Texto descifrado con la llave: " << key << " -> " << decrypted_text << "\n";
+        cout << "Texto descifrado con la llave: " << key << " -> " << decrypted_text << "\n";
         return true;
     }
-
-    // if (key == "AAAAEMJC") {
-    //     std::cout << "Texto descifrado con la llave: " << key << " -> " << decrypted_text << "\n";
-    //     return true;
-    // }
 
     return false;
 }
 
-std::string loadText(const std::string& filename) {
-    std::ifstream file(filename);
+string loadText(const string& filename) {
+    ifstream file(filename);
 
     if (!file.is_open()) {
-        std::cerr << "No se pudo abrir el archivo " << filename << std::endl;
+        cerr << "No se pudo abrir el archivo " << filename << endl;
         return "";
     }
 
-    std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    string text((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
     file.close();
 
     return text;
 }
 
-const std::string valid_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const string valid_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-std::string generateKey(unsigned long long index) {
-    std::string key(8, ' '); // Crear una cadena de 8 espacios
+string generateKey(unsigned long long index) {
+    string key(8, ' '); // Crear una cadena de 8 espacios
 
     for (int i = 0; i < 8; ++i) {
         key[7 - i] = valid_chars[index % valid_chars.size()]; // Obtener el carácter correspondiente
@@ -88,36 +86,34 @@ std::string generateKey(unsigned long long index) {
 
 int main(int argc, char **argv) {
     if (argc != 3) {
-        std::cerr << "Uso: " << argv[0] << " <archivo> <clave para cifrar>" << std::endl;
+        cerr << "Uso: " << argv[0] << " <archivo> <clave para cifrar>" << endl;
         return 1;
     }
 
-    std::string filename = argv[1];
+    string filename = argv[1];
+    string plain_text = loadText(filename);
+    string key_phrase;
+    cout << "Ingrese la frase clave a buscar: ";
+    getline(cin, key_phrase);
 
-    std::string plain_text = loadText(filename);
-    std::string key_phrase;
-    std::cout << "Ingrese la frase clave a buscar: ";
-    std::getline(std::cin, key_phrase);
-
-    std::string cipher_text;
-
-    std::string key = argv[2];
+    string cipher_text;
+    string key = argv[2];
 
     encryptText(key, plain_text, cipher_text);
 
-    std::cout << "Texto cifrado: " << cipher_text << std::endl;
+    cout << "Texto cifrado: " << cipher_text << endl;
 
     // Empezar a medir el tiempo
     clock_t start_time = clock();
 
     // Iterar sobre todas las posibles combinaciones de llaves (2^56 para DES)
     for (unsigned long long i = 0; i < (1ULL << 56); i++) {
-        std::string key = generateKey(i);
+        string key = generateKey(i);
 
-        std::cout << "Probando llave: " << key << "\n";
+        cout << "Probando llave: " << key << "\n";
 
         if (tryKey(key, cipher_text, key_phrase)) {
-            std::cout << "Llave encontrada: " << key << "\n";
+            cout << "Llave encontrada: " << key << "\n";
             break;
         }
     }
@@ -125,7 +121,7 @@ int main(int argc, char **argv) {
     // Fin de la medición del tiempo
     clock_t end_time = clock();
     double elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
-    std::cout << "Tiempo total de ejecución: " << std::fixed << std::setprecision(2) << elapsed_time << " segundos\n";
+    cout << "Tiempo total de ejecución: " << fixed << setprecision(2) << elapsed_time << " segundos\n";
 
     return 0;
 }
