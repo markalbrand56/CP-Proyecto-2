@@ -26,7 +26,7 @@ void decrypt(long key, char *ciph, int len) {
     DES_ecb_encrypt((const_DES_cblock *)ciph, (DES_cblock *)ciph, &schedule, DES_DECRYPT);
 }
 
-void encrypt(long key, char *ciph, int len) {
+void encryptdes(long key, char *ciph, int len) {
     DES_key_schedule schedule;
     DES_cblock key_block;
     memcpy(&key_block, &key, sizeof(key_block));
