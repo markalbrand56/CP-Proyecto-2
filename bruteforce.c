@@ -1,4 +1,9 @@
 /*
+Proyecto MPI
+Grupo 4
+
+Parte A Inciso 4
+
 RUN COMMAND:
 ```
 mpicc -o bruteforce.o bruteforce.c -lcrypto

@@ -2,7 +2,7 @@
 Proyecto MPI
 Grupo 4
 
-Parte A: DES fuerza bruta
+Parte A inciso 3: DES fuerza bruta
 
 */
 
