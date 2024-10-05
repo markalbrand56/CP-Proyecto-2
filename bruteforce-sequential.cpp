@@ -1,3 +1,11 @@
+/*
+Proyecto MPI
+Grupo 4
+
+Parte A: DES fuerza bruta
+
+*/
+
 #include <iostream>
 #include <string>
 #include <chrono>
