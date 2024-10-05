@@ -18,10 +18,12 @@ g++ -o build/bruteforce-sequential.o bruteforce-sequential.cpp
 
 using namespace std;
 
-void encryptText(const string& key, const string& plain_text, string& cipher_text) {
+void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     DES_cblock key_block;
     DES_key_schedule schedule;
-    memcpy(key_block, key.c_str(), sizeof(key_block));
+
+    // Convertir la llave de uint64_t a DES_cblock
+    memcpy(key_block, &key, sizeof(key_block));
     DES_set_key_unchecked(&key_block, &schedule);
 
     char encrypted_text[256] = {0};  // Inicializar a cero
@@ -35,10 +37,12 @@ void encryptText(const string& key, const string& plain_text, string& cipher_tex
     cipher_text = string(encrypted_text, plain_text_length); // Ajustar tamaño
 }
 
-bool tryKey(const string& key, const string& cipher_text, const string& key_phrase) {
+bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
     DES_cblock key_block;
     DES_key_schedule schedule;
-    memcpy(key_block, key.c_str(), sizeof(key_block));
+
+    // Convertir la llave de uint64_t a DES_cblock
+    memcpy(key_block, &key, sizeof(key_block));
     DES_set_key_unchecked(&key_block, &schedule);
 
     char decrypted_text[256] = {0};  // Inicializar a cero
@@ -71,22 +75,14 @@ string loadText(const string& filename) {
     return text;
 }
 
-const string valid_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-string generateKey(unsigned long long index) {
-    string key(8, ' '); // Crear una cadena de 8 espacios
-
-    for (int i = 0; i < 8; ++i) {
-        key[7 - i] = valid_chars[index % valid_chars.size()]; // Obtener el carácter correspondiente
-        index /= valid_chars.size(); // Dividir el índice para la siguiente posición
-    }
-
-    return key;
+uint64_t generateKey(unsigned long long index) {
+    // Generar una llave a partir del índice
+    return static_cast<uint64_t>(index);
 }
 
 int main(int argc, char **argv) {
-    if (argc != 3) {
-        cerr << "Uso: " << argv[0] << " <archivo> <clave para cifrar>" << endl;
+    if (argc != 2) {
+        cerr << "Uso: " << argv[0] << " <archivo>" << endl;
         return 1;
     }
 
@@ -97,7 +93,10 @@ int main(int argc, char **argv) {
     getline(cin, key_phrase);
 
     string cipher_text;
-    string key = argv[2];
+    uint64_t key; // No se usará al inicio, solo para cifrado
+
+    cout << "Ingrese una clave numérica para cifrar (0 - 2^64 - 1): ";
+    cin >> key;
 
     encryptText(key, plain_text, cipher_text);
 
@@ -106,14 +105,12 @@ int main(int argc, char **argv) {
     // Empezar a medir el tiempo
     clock_t start_time = clock();
 
-    // Iterar sobre todas las posibles combinaciones de llaves (2^56 para DES)
-    for (unsigned long long i = 0; i < (1ULL << 56); i++) {
-        string key = generateKey(i);
+    // Iterar sobre todas las posibles combinaciones de llaves (0 a 2^64-1)
+    for (uint64_t i = 0; i <= UINT64_MAX; i++) {
+        cout << "Probando llave: " << i << "\n";
 
-        cout << "Probando llave: " << key << "\n";
-
-        if (tryKey(key, cipher_text, key_phrase)) {
-            cout << "Llave encontrada: " << key << "\n";
+        if (tryKey(i, cipher_text, key_phrase)) {
+            cout << "Llave encontrada: " << i << "\n";
             break;
         }
     }

@@ -71,6 +71,11 @@ int main(int argc, char *argv[]){ //char **argv
   MPI_Irecv(&found, 1, MPI_LONG, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &req);
 
   for(int i = mylower; i<myupper && (found==0); ++i){
+    
+    if (i % 1000000 == 0){
+      cout << "Proceso " << id << " probando llave " << i << endl;
+    }
+
     if(tryKey(i, (char *)cipher, ciphlen)){
       found = i;
       for(int node=0; node<N; node++){
