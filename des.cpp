@@ -47,6 +47,24 @@ void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     cipher_text = string(encrypted_text, plain_text_length); // Ajustar tamaño
 }
 
+void decrypt(uint64_t key, const string& cipher_text, string& plain_text) {
+    DES_cblock key_block;
+    DES_key_schedule schedule;
+
+    // Convertir la llave de uint64_t a DES_cblock
+    memcpy(key_block, &key, sizeof(key_block));
+    DES_set_key_unchecked(&key_block, &schedule);
+
+    char decrypted_text[256] = {0};  // Inicializar a cero
+    size_t cipher_text_length = cipher_text.size();
+
+    for (size_t i = 0; i < cipher_text_length; i += 8) {
+        DES_ecb_encrypt((const_DES_cblock*)(cipher_text.c_str() + i), (DES_cblock*)(decrypted_text + i), &schedule, DES_DECRYPT);
+    }
+
+    plain_text = string(decrypted_text, cipher_text_length); // Ajustar tamaño
+}
+
 string loadText(const string& filename) {
     ifstream file(filename);
 
@@ -84,6 +102,11 @@ int main(int argc, char **argv) {
     encryptText(key, plain_text, cipher_text);
 
     cout << "Texto cifrado: " << cipher_text << endl;
+
+    string decrypted_text;
+    decrypt(key, cipher_text, decrypted_text);
+
+    cout << "Texto descifrado: " << decrypted_text << endl;
 
     return 0;
 }
