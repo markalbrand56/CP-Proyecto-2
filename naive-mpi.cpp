@@ -6,7 +6,6 @@ Parte B: DES Naive
 
 mpic++ naive-mpi.cpp -lcrypto -o build/naive-mpi.o
 mpirun -np 4 ./build/naive-mpi.o <archivo>
-
 */
 
 #include <iostream>
@@ -109,52 +108,64 @@ int main(int argc, char **argv) {
         cout << "Texto cifrado: " << cipher_text << endl;
     }
 
-    // Enviar la clave numérica y la frase clave a todos los procesos
-    MPI_Bcast(&key, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
-
-    // Enviar la frase clave a todos los procesos
+    // Enviar la frase clave y el texto cifrado a todos los procesos
     int phrase_length = key_phrase.size();
     MPI_Bcast(&phrase_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
     key_phrase.resize(phrase_length);
     MPI_Bcast(&key_phrase[0], phrase_length, MPI_CHAR, 0, MPI_COMM_WORLD);
 
-    // Enviar el texto cifrado a todos los procesos
     int cipher_length = cipher_text.size();
     MPI_Bcast(&cipher_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
     cipher_text.resize(cipher_length);
     MPI_Bcast(&cipher_text[0], cipher_length, MPI_CHAR, 0, MPI_COMM_WORLD);
 
     // Empezar a medir el tiempo
-    clock_t start_time = clock();
+    double start_time = MPI_Wtime();
 
     // Cada proceso trabaja en un rango de llaves
-    uint64_t range = UINT64_MAX / size;
-    uint64_t start = rank * range;
-    uint64_t end = (rank == size - 1) ? UINT64_MAX : (start + range - 1);
-
+    uint64_t start = rank;
     bool found = false;
     uint64_t found_key = 0;
 
+    // Canal de mensajes (para comunicar clave encontrada)
+    MPI_Request request;
+    MPI_Status status;
+    bool message_received = false;
+
     // Búsqueda por fuerza bruta en el rango asignado
-    for (uint64_t i = start; i <= end && !found; i++) {
+    for (uint64_t i = start; i <= UINT64_MAX && !found; i += size) {
         if (tryKey(i, cipher_text, key_phrase)) {
             found_key = i;
             found = true;
+
+            // Enviar mensaje a los demás procesos para indicar que la clave fue encontrada
+            for (int proc = 0; proc < size; proc++) {
+                if (proc != rank) {
+                    MPI_Send(&found_key, 1, MPI_UINT64_T, proc, 0, MPI_COMM_WORLD);
+                }
+            }
+
             cout << "Proceso " << rank << " encontró la llave: " << i << "\n";
+            break;
         }
-        // Verificar si algún proceso ha encontrado la llave
-        MPI_Allreduce(MPI_IN_PLACE, &found, 1, MPI_C_BOOL, MPI_LOR, MPI_COMM_WORLD);
-        if (found) {
+
+        // Verificar si hay algún mensaje de otro proceso indicando que la clave fue encontrada
+        int flag;
+        MPI_Iprobe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &flag, &status);
+        if (flag) {
+            // Recibir el mensaje con la clave encontrada
+            MPI_Recv(&found_key, 1, MPI_UINT64_T, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+            found = true;  // Detener la búsqueda
             break;
         }
     }
 
     // Fin de la medición del tiempo
-    clock_t end_time = clock();
-    double elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
+    double end_time = MPI_Wtime();
+    double elapsed_time = end_time - start_time;
 
     if (rank == 0) {
-        cout << "Tiempo total de ejecución: " << fixed << setprecision(2) << elapsed_time << " segundos\n";
+        cout << "Clave encontrada. Tiempo total de ejecución: " << fixed << setprecision(2) << elapsed_time << " segundos\n";
     }
 
     MPI_Finalize();  // Finalizar MPI
