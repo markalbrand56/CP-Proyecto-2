@@ -72,8 +72,8 @@ int main(int argc, char *argv[]){ //char **argv
 
   for(int i = mylower; i<myupper && (found==0); ++i){
     
-    if (i % 1000000 == 0){
-      cout << "Proceso " << id << " probando llave " << i << endl;
+    if (i % 5000000 == 0){
+      printf("Probando llave %li\n", i);
     }
 
     if(tryKey(i, (char *)cipher, ciphlen)){

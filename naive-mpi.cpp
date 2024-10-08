@@ -127,6 +127,8 @@ int main(int argc, char **argv) {
     bool found = false;
     uint64_t found_key = 0;
 
+    cout << "\nProceso " << rank << " iniciando búsqueda en el rango: " << start << " - " << UINT64_MAX << " con incremento de " << size << endl;
+
     // Canal de mensajes (para comunicar clave encontrada)
     MPI_Request request;
     MPI_Status status;
