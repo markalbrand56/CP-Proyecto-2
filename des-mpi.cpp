@@ -1,3 +1,14 @@
+/*
+Proyecto MPI
+Grupo 4
+
+Parte B: DES Naive
+
+mpicc des-mpi -lcrypto -o /build/naive.o
+mpirun -np 4 ./build/naive.o <archivo>
+
+*/
+
 #include <iostream>
 #include <cstring>
 #include <fstream>
