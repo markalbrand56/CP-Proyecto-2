@@ -45,7 +45,7 @@ bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
     memcpy(key_block, &key, sizeof(key_block));
     DES_set_key_unchecked(&key_block, &schedule);
 
-    char decrypted_text[256] = {0};  // Inicializar a cero
+    char decrypted_text[2048] = {0};  // Inicializar a cero
     size_t cipher_text_length = cipher_text.size();
 
     for (size_t i = 0; i < cipher_text_length; i += 8) {
