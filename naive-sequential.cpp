@@ -4,8 +4,8 @@ Grupo 4
 
 Parte A inciso 3: DES fuerza bruta
 
-g++ -o build/naive-sequential.o naive-sequential.cpp
-./build/naive-sequential.o
+g++ -o build/naive-sequential.o naive-sequential.cpp -lcrypto
+./build/naive-sequential.o input.txt
 
 */
 
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
 
     // Iterar sobre todas las posibles combinaciones de llaves (0 a 2^64-1)
     for (uint64_t i = 0; i <= UINT64_MAX; i++) {
-        cout << "Probando llave: " << i << "\n";
+        // cout << "Probando llave: " << i << "\n";
 
         if (tryKey(i, cipher_text, key_phrase)) {
             cout << "Llave encontrada: " << i << "\n";

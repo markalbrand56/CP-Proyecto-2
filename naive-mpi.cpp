@@ -4,7 +4,7 @@ Grupo 4
 
 Parte B: DES Naive
 
-mpicc naive-mpi.cpp -lcrypto -o /build/naive-mpi.o
+mpic++ naive-mpi.cpp -lcrypto -o build/naive-mpi.o
 mpirun -np 4 ./build/naive-mpi.o <archivo>
 
 */
