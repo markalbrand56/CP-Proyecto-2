@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
     // Fin de la medición del tiempo
     clock_t end_time = clock();
     double elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
-    cout << "Tiempo total de ejecución: " << fixed << setprecision(2) << elapsed_time << " segundos\n";
+    cout << "Tiempo total de ejecución: " << fixed << setprecision(4) << elapsed_time << " segundos\n";
 
     return 0;
 }

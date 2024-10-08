@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
     double elapsed_time = end_time - start_time;
 
     if (rank == 0) {
-        cout << "Clave encontrada. Tiempo total de ejecución: " << fixed << setprecision(2) << elapsed_time << " segundos\n";
+        cout << "Clave encontrada. Tiempo total de ejecución: " << fixed << setprecision(4) << elapsed_time << " segundos\n";
     }
 
     MPI_Finalize();  // Finalizar MPI
