@@ -4,8 +4,8 @@ Grupo 4
 
 Parte A inciso 3: DES fuerza bruta
 
-g++ -o build/bruteforce-sequential.o bruteforce-sequential.cpp
-./build/bruteforce-sequential.o
+g++ -o build/naive-sequential.o naive-sequential.cpp
+./build/naive-sequential.o
 
 */
 
