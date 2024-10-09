@@ -28,6 +28,17 @@ g++ -o build/encrypt-text.o encrypt-text.cpp
 
 using namespace std;
 
+/*
+Función encypText
+Parámetros:
+    uint64_t key: Llave numérica de 64 bits
+    const string& plain_text: Texto a cifrar
+    string& cipher_text: Texto cifrado
+Descripción:
+    Cifra el texto plain_text utilizando la llave key y almacena el resultado en cipher_text
+Retorno:
+    void
+*/
 void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -45,6 +56,18 @@ void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     cipher_text = string(encrypted_text, padded_length);
     delete[] encrypted_text;
 }
+
+/*
+Función decrypt
+Parámetros:
+    uint64_t key: Llave numérica de 64 bits
+    const string& cipher_text: Texto cifrado
+    string& plain_text: Texto descifrado
+Descripción:
+    Descifra el texto cipher_text utilizando la llave key y almacena el resultado en plain_text
+Retorno:
+    void
+*/
 
 void decrypt(uint64_t key, const string& cipher_text, string& plain_text) {
     DES_cblock key_block;
@@ -64,6 +87,15 @@ void decrypt(uint64_t key, const string& cipher_text, string& plain_text) {
     delete[] decrypted_text;
 }
 
+/*
+Función loadText
+Parámetros:
+    const string& filename: Nombre del archivo a cargar
+Descripción:
+    Carga el contenido del archivo filename en un string
+Retorno:
+    string: Contenido del archivo
+*/
 string loadText(const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) {

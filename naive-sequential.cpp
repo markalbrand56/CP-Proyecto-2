@@ -18,6 +18,17 @@ g++ -o build/naive-sequential.o naive-sequential.cpp -lcrypto
 
 using namespace std;
 
+/*
+Función encryptText
+Parámetros:
+    key: Llave de cifrado
+    plain_text: Texto a cifrar
+    cipher_text: Texto cifrado
+Descripción:
+    Cifra el texto plano usando la llave proporcionada
+Retorno:
+    void
+*/
 void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -37,6 +48,17 @@ void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     cipher_text = string(encrypted_text, plain_text_length); // Ajustar tamaño
 }
 
+/*
+Función tryKey
+Parámetros:
+    key: Llave a probar
+    cipher_text: Texto cifrado
+    key_phrase: Frase clave a buscar
+Descripción:
+    Descifra el texto cifrado usando la llave proporcionada y verifica si contiene la frase clave
+Retorno:
+    bool: Verdadero si la frase clave fue encontrada, falso en caso contrario
+*/
 bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -61,6 +83,15 @@ bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
     return false;
 }
 
+/*
+Función loadText
+Parámetros:
+    filename: Nombre del archivo a cargar
+Descripción:
+    Carga el contenido de un archivo de texto en un string
+Retorno:
+    string: Contenido del archivo
+*/
 string loadText(const string& filename) {
     ifstream file(filename);
 
@@ -75,6 +106,15 @@ string loadText(const string& filename) {
     return text;
 }
 
+/*
+Función generateKey
+Parámetros:
+    index: Índice para generar la llave
+Descripción:
+    Genera una llave a partir de un índice
+Retorno:
+    uint64_t: Llave generada
+*/
 uint64_t generateKey(unsigned long long index) {
     // Generar una llave a partir del índice
     return static_cast<uint64_t>(index);

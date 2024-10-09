@@ -19,6 +19,15 @@ mpirun -np 4 ./build/naive-mpi.o <archivo>
 
 using namespace std;
 
+/*
+Función encryptText
+Parámetros:
+    key: clave numérica para cifrar
+    plain_text: texto a cifrar
+    cipher_text: texto cifrado
+Descripción:
+    Cifra el texto plano usando la clave dada y guarda el resultado en cipher_text.
+*/
 void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -33,6 +42,16 @@ void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     }
 }
 
+/*
+Función tryKey
+Parámetros:
+    key: clave numérica a probar
+    cipher_text: texto cifrado
+    key_phrase: frase clave a buscar
+Descripción:
+    Intenta descifrar el texto cifrado usando la clave dada y verifica si contiene la frase clave.
+    Si la encuentra, imprime el texto descifrado y retorna verdadero.
+*/
 bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -57,6 +76,13 @@ bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
     return false;
 }
 
+/*
+Función loadText
+Parámetros:
+    filename: nombre del archivo a cargar
+Descripción:
+    Carga el contenido de un archivo de texto y lo retorna como un string.
+*/
 string loadText(const string& filename) {
     ifstream file(filename);
 

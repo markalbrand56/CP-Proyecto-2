@@ -17,6 +17,17 @@ Ejecutar: mpirun -np <num_procesos> ./master_slave_mpi.o <archivo>
 
 using namespace std;
 
+/*
+Función encryptText
+Parámetros:
+    key_num: uint64_t, clave numérica de 64 bits
+    plain_text: string, texto a cifrar
+    cipher_text: string, texto cifrado
+Descripción:
+    Cifra el texto plano usando la clave numérica dada.
+Retorno:
+    void
+*/
 void encryptText(uint64_t key_num, const string& plain_text, string& cipher_text) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -58,6 +69,17 @@ void encryptText(uint64_t key_num, const string& plain_text, string& cipher_text
     }
 }
 
+/*
+Función tryKey
+Parámetros:
+    key_num: uint64_t, clave numérica de 64 bits
+    cipher_text: string, texto cifrado
+    key_phrase: string, frase clave a buscar
+Descripción:
+    Descifra el texto cifrado usando la clave numérica dada y verifica si contiene la frase clave.
+Retorno:
+    bool, true si el texto descifrado contiene la frase clave, false en caso contrario
+*/
 bool tryKey(uint64_t key_num, const string& cipher_text, const string& key_phrase) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -105,6 +127,15 @@ bool tryKey(uint64_t key_num, const string& cipher_text, const string& key_phras
     return false;
 }
 
+/*
+Función loadText
+Parámetros:
+    filename: string, nombre del archivo a cargar
+Descripción:
+    Carga el contenido de un archivo de texto en un string.
+Retorno:
+    string, contenido del archivo
+*/
 string loadText(const string& filename) {
     ifstream file(filename);
 

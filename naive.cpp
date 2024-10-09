@@ -9,6 +9,16 @@
 
 using namespace std;
 
+/*
+Función encyptText
+Parámetros:
+    key: clave de cifrado
+    plain_text: texto a cifrar
+    cipher_text: texto cifrado
+Descripción:
+    Cifra el texto plano usando la clave de cifrado dada.
+    El texto cifrado se almacena en la variable cipher_text.
+*/
 void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -23,6 +33,17 @@ void encryptText(uint64_t key, const string& plain_text, string& cipher_text) {
     }
 }
 
+/*
+Función tryKey
+Parámetros:
+    key: clave a probar
+    cipher_text: texto cifrado
+    key_phrase: frase clave a buscar
+Retorno:
+    true si la clave descifra el texto cifrado y contiene la frase clave, false en caso contrario
+Descripción:
+    Descifra el texto cifrado usando la clave dada y verifica si contiene la frase clave.
+*/
 bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
     DES_cblock key_block;
     DES_key_schedule schedule;
@@ -47,6 +68,15 @@ bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
     return false;
 }
 
+/*
+Función loadText
+Parámetros:
+    filename: nombre del archivo a cargar
+Retorno:
+    contenido del archivo
+Descripción:
+    Carga el contenido de un archivo en una cadena de texto.
+*/
 string loadText(const string& filename) {
     ifstream file(filename);
 
