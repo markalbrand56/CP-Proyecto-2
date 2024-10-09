@@ -1,10 +1,20 @@
+/*
+Proyecto MPI
+Grupo 4
+
+Parte B: DES Naive
+
+mpic++ naive-mpi.cpp -lcrypto -o build/naive-mpi.o
+mpirun -np 4 ./build/naive-mpi.o <archivo>
+*/
+
 #include <iostream>
 #include <cstring>
 #include <fstream>
 #include <ctime>
 #include <iomanip>
 #include <openssl/des.h>
-#include <mpi.h>
+#include <mpi.h>  // Incluir la librería de MPI
 #include <vector>
 
 using namespace std;
@@ -37,6 +47,7 @@ bool tryKey(uint64_t key, const string& cipher_text, const string& key_phrase) {
         DES_ecb_encrypt((const_DES_cblock*)(cipher_text.c_str() + i), (DES_cblock*)(decrypted_text.data() + i), &schedule, DES_DECRYPT);
     }
 
+    // Verificar si contiene exactamente la frase clave
     string decrypted_str(decrypted_text.data(), cipher_text_length);
     if (decrypted_str.find(key_phrase) != string::npos) {
         cout << "Texto descifrado con la llave: " << key << " -> " << decrypted_str << "\n";
@@ -61,11 +72,11 @@ string loadText(const string& filename) {
 }
 
 int main(int argc, char **argv) {
-    MPI_Init(&argc, &argv);
+    MPI_Init(&argc, &argv);  // Inicializar MPI
 
     int rank, size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);  // Obtener el ID del proceso
+    MPI_Comm_size(MPI_COMM_WORLD, &size);  // Obtener el número de procesos
 
     string key_phrase;
     uint64_t key;
@@ -81,6 +92,7 @@ int main(int argc, char **argv) {
     }
 
     if (rank == 0) {
+        // Solo el proceso maestro carga el texto y pide la frase clave y la clave de cifrado
         string filename = argv[1];
         plain_text = loadText(filename);
 
@@ -90,10 +102,13 @@ int main(int argc, char **argv) {
         cout << "Ingrese una clave numérica para cifrar (0 - 2^64 - 1): ";
         cin >> key;
 
+        // Cifrar el texto usando la clave dada
         encryptText(key, plain_text, cipher_text);
+
         cout << "Texto cifrado: " << cipher_text << endl;
     }
 
+    // Enviar la frase clave y el texto cifrado a todos los procesos
     int phrase_length = key_phrase.size();
     MPI_Bcast(&phrase_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
     key_phrase.resize(phrase_length);
@@ -104,37 +119,57 @@ int main(int argc, char **argv) {
     cipher_text.resize(cipher_length);
     MPI_Bcast(&cipher_text[0], cipher_length, MPI_CHAR, 0, MPI_COMM_WORLD);
 
-    uint64_t found_key = 0;
-    bool found = false;
-    bool found_global = false;
-
-    uint64_t range_size = 50000000;
-    uint64_t start = rank * range_size;
-    uint64_t end = start + range_size;
-
-    cout << "Proceso " << rank << " busca en el rango [" << start << ", " << end << ")\n";
-
+    // Empezar a medir el tiempo
     double start_time = MPI_Wtime();
 
-    for (uint64_t i = start; i < end && !found; i++) {
-        MPI_Bcast(&found_global, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
-        if (found_global) break;
+    // Cada proceso trabaja en un rango de llaves
+    uint64_t start = rank;
+    bool found = false;
+    uint64_t found_key = 0;
 
-        if (tryKey(i, cipher_text, key_phrase)) {
+    // Canal de mensajes (para comunicar clave encontrada)
+    MPI_Request request;
+    MPI_Status status;
+    bool message_received = false;
+
+    // Búsqueda utilizando un algoritmo más eficiente: Búsqueda en profundidad primero (DFS)
+    vector<uint64_t> stack;
+    stack.push_back(start);
+
+    while (!stack.empty() && !found) {
+        uint64_t current_key = stack.back();
+        stack.pop_back();
+
+        if (tryKey(current_key, cipher_text, key_phrase)) {
+            found_key = current_key;
             found = true;
-            found_key = i;
-            found_global = true;
 
-            MPI_Bcast(&found_global, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
+            // Enviar mensaje a los demás procesos para indicar que la clave fue encontrada
             for (int proc = 0; proc < size; proc++) {
                 if (proc != rank) {
                     MPI_Send(&found_key, 1, MPI_UINT64_T, proc, 0, MPI_COMM_WORLD);
                 }
             }
-            cout << "Proceso " << rank << " encontró la llave: " << found_key << "\n";
+            break;
+        }
+
+        // Verificar si hay algún mensaje de otro proceso indicando que la clave fue encontrada
+        int flag;
+        MPI_Iprobe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &flag, &status);
+        if (flag) {
+            // Recibir el mensaje con la clave encontrada
+            MPI_Recv(&found_key, 1, MPI_UINT64_T, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+            found = true;  // Detener la búsqueda
+            break;
+        }
+
+        // Agregar próximas posibles llaves a la pila
+        if (current_key + size <= UINT64_MAX && !found) {
+            stack.push_back(current_key + size);
         }
     }
 
+    // Fin de la medición del tiempo
     double end_time = MPI_Wtime();
     double elapsed_time = end_time - start_time;
 
@@ -142,6 +177,6 @@ int main(int argc, char **argv) {
         cout << "Clave encontrada. Tiempo total de ejecución: " << fixed << setprecision(4) << elapsed_time << " segundos\n";
     }
 
-    MPI_Finalize();
+    MPI_Finalize();  // Finalizar MPI
     return 0;
 }
