@@ -138,6 +138,13 @@ int main(int argc, char **argv) {
     cout << "Ingrese una clave numérica para cifrar (0 - 2^64 - 1): ";
     cin >> key;
 
+    cout << "Llave ingresada " << key << endl;
+
+    if (key == 0) {
+        cerr << "La llave no puede ser 0\n";
+        return 1;
+    }
+
     cout << "Usando la llave: " << key << endl;
 
     encryptText(key, plain_text, cipher_text);

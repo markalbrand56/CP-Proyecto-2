@@ -133,6 +133,14 @@ int main(int argc, char **argv) {
         cout << "Ingrese una clave numérica para cifrar (0 - 2^64 - 1): ";
         cin >> key;
 
+        cout << "Llave ingresada " << key << endl;
+
+        if (key == 0) {
+            cerr << "La llave no puede ser 0\n";
+            MPI_Finalize();
+            return 1;
+        }
+
         // Cifrar el texto usando la clave dada
         encryptText(key, plain_text, cipher_text);
 
